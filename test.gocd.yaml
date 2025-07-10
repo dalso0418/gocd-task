@@ -42,7 +42,7 @@ pipelines:
                     command: echo
                     arguments:
                       - ">>> 2. 여기서 실제 빌드 및 테스트 명령어를 실행합니다. (예: ./gradlew build)"
-       - deploy-to-server:
+      - deploy-to-server:
           jobs:
             # 'run-remote-script' 라는 이름의 잡을 정의합니다.
             run-remote-script:

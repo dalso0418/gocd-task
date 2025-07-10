@@ -48,14 +48,22 @@ pipelines:
             run-remote-script:
               tasks:
                 # 1. SSH 개인 키를 파일로 생성합니다.
-                # 보안을 위해 SSH 키는 GoCD의 시크릿 관리 기능을 통해 주입합니다.
                 - exec:
                     command: bash
                     arguments:
                       - -c
                       - |
-                        echo "{{SECRET:[ssh_private_key]}}" > /go/id_rsa
+                        printf "%s\n" "{{SECRET:[ssh_private_key]}}" > /go/id_rsa
                         chmod 600 /go/id_rsa
+                # ⭐️ 디버깅 단계 추가: 생성된 키 파일의 내용을 직접 확인합니다.
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "--- DEBUG: Printing content of id_rsa file ---"
+                        cat /go/id_rsa
+                        echo "--- END DEBUG ---"
                 # 2. SSH를 사용하여 원격 서버에 접속하고 배포 스크립트를 실행합니다.
                 - exec:
                     command: ssh

@@ -53,17 +53,10 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        printf "%s\n" "{{SECRET:[ssh_private_key]}}" > /go/id_rsa
+                        # printf의 %b 포맷을 사용하여 시크릿 변수 내의 \n 문자를
+                        # 실제 줄바꿈으로 변환하여 키 파일을 올바르게 생성합니다.
+                        printf "%b\n" "{{SECRET:[ssh_private_key]}}" > /go/id_rsa
                         chmod 600 /go/id_rsa
-                # ⭐️ 디버깅 단계 추가: 생성된 키 파일의 내용을 직접 확인합니다.
-                - exec:
-                    command: bash
-                    arguments:
-                      - -c
-                      - |
-                        echo "--- DEBUG: Printing content of id_rsa file ---"
-                        cat /go/id_rsa
-                        echo "--- END DEBUG ---"
                 # 2. SSH를 사용하여 원격 서버에 접속하고 배포 스크립트를 실행합니다.
                 - exec:
                     command: ssh

@@ -46,7 +46,7 @@ pipelines:
           jobs:
             # 'run-remote-script' 라는 이름의 잡을 정의합니다.
             run-remote-script:
-              # ⭐️ 1. SSH 키를 안전한 환경 변수로 정의합니다.
+              # 1. SSH 키를 안전한 환경 변수로 정의합니다.
               # 이 변수의 실제 값은 GoCD UI에서 직접 설정해야 합니다.
               secure_environment_variables:
                 SSH_PRIVATE_KEY: "placeholder"
@@ -57,7 +57,7 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        printf "%s\n" "$SSH_PRIVATE_KEY" > /go/id_rsa
+                        echo "$SSH_PRIVATE_KEY" > /go/id_rsa
                         chmod 600 /go/id_rsa
                 # 3. SSH를 사용하여 원격 서버에 접속하고 배포 스크립트를 실행합니다.
                 - exec:

@@ -16,6 +16,10 @@ pipelines:
         # Git 저장소를 머티리얼로 사용합니다.
         git: https://github.com/dalso0418/gocd # 감시할 실제 애플리케이션의 Git 저장소 주소입니다.
         branch: main # main 브랜치의 변경 사항을 감시합니다.
+        # Private 저장소 접근을 위한 사용자 이름과 비밀번호(또는 Personal Access Token)를 설정합니다.
+        # 보안을 위해 비밀번호는 GoCD의 암호화된 변수를 사용하는 것이 좋습니다.
+        username: dalso0418
+        password: "{{SECRET:[config_repo_credential]}}"
         auto_update: true # GoCD가 자동으로 새로운 커밋을 확인하도록 설정합니다.
 
     # 파이프라인의 단계(스테이지)들을 순서대로 정의합니다.

@@ -53,8 +53,6 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        # printf의 %b 포맷을 사용하여 시크릿 변수 내의 \n 문자를
-                        # 실제 줄바꿈으로 변환하여 키 파일을 올바르게 생성합니다.
                         printf "%b\n" "{{SECRET:[ssh_private_key]}}" > /go/id_rsa
                         chmod 600 /go/id_rsa
                 # 2. SSH를 사용하여 원격 서버에 접속하고 배포 스크립트를 실행합니다.

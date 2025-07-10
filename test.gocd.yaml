@@ -4,7 +4,7 @@ format_version: 10
 # 파이프라인 그룹들을 정의합니다.
 pipelines:
   # 'test-pipeline' 이라는 이름의 파이프라인을 정의합니다.
-  test-pipeline:
+  test-pipeline2:
     # 이 파이프라인은 'defaultGroup' 이라는 그룹에 속합니다.
     # 그룹은 대시보드에서 파이프라인을 정리하는 폴더 역할을 합니다.
     group: defaultGroup

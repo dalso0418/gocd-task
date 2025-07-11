@@ -12,7 +12,8 @@ pipelines:
     materials:
       my-app-repo:
         # Git 저장소를 머티리얼로 사용합니다.
-        git: https://github.com/dalso0418/gocd-task.git
+        git: https://github.com/somoon0418/my-nook.git
+        password: "{{SECRET:[my-file-secrets][config_repo_credential]}}"
         branch: main
         auto_update: true
 

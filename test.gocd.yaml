@@ -15,7 +15,7 @@ pipelines:
         git: https://github.com/somoon0418/my-nook.git
         username: somoon0418
         password: "{{SECRET:[my-file-secrets][somoon_config_repo_credential]}}"
-        branch: main
+        branch: master
         auto_update: true
 
     # 파이프라인의 단계(스테이지)들을 순서대로 정의합니다.

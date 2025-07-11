@@ -14,7 +14,7 @@ pipelines:
         # Git 저장소를 머티리얼로 사용합니다.
         git: https://github.com/somoon0418/my-nook.git
         username: somoon0418
-        password: "{{SECRET:[somoon_config_repo_credential][somoon_config_repo_credential]}}"
+        password: "{{SECRET:[my-file-secrets][somoon_config_repo_credential]}}"
         branch: main
         auto_update: true
 

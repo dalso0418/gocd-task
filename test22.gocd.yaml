@@ -1,0 +1,26 @@
+# 파이프라인 포맷 버전을 지정합니다.
+format_version: 10
+
+# 파이프라인 그룹을 정의합니다.
+pipelines:
+  # 'test-pipeline' 이라는 이름의 파이프라인을 정의합니다.
+  test22:
+    # 이 파이프라인은 'defaultGroup' 이라는 그룹에 속합니다.
+    group: defaultGroup
+    # 파이프라인의 재료(트리거)를 정의합니다.
+    materials:
+      my-git-repo2: # 머티리얼에 'my-git-repo'라는 이름을 부여합니다.
+        git: https://github.com/dalso0418/gocd-task # 감시할 Git 저장소 주소입니다.
+        branch: main # main 브랜치를 감시합니다.
+    # 파이프라인의 단계(스테이지)들을 정의합니다.
+    stages:
+      - test: # 'test' 라는 이름의 스테이지를 정의합니다.
+          # 이 스테이지에서 실행될 작업(잡)들을 정의합니다.
+          jobs:
+            test: # 'test' 라는 이름의 잡을 정의합니다.
+              # 이 잡에서 실행될 명령어(태스크)들을 정의합니다.
+              tasks:
+                - exec: # exec 태스크는 셸 명령어를 실행합니다.
+                    command: echo # 실행할 명령어는 'echo' 입니다.
+                    arguments:
+                      - "Test from Pipelines as Code!" # 명령어에 전달할 인자입니다.

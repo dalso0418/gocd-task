@@ -20,18 +20,6 @@ pipelines:
 
     # 파이프라인의 단계(스테이지)들을 순서대로 정의합니다.
     stages:
-      - build-and-test:
-          jobs:
-            compile-and-unit-test:
-              tasks:
-                - exec:
-                    command: echo
-                    arguments:
-                      - ">>> 1. 코드를 성공적으로 가져왔습니다."
-                - exec:
-                    command: echo
-                    arguments:
-                      - ">>> 2. 여기서 실제 빌드 및 테스트 명령어를 실행합니다. (예:./gradlew build)"
       - deploy-to-server:
           jobs:
             run-remote-script:
@@ -46,4 +34,4 @@ pipelines:
                       - -o # SSH 접속 옵션을 지정합니다.
                       - StrictHostKeyChecking=no # 처음 접속하는 서버의 호스트 키를 자동으로 신뢰합니다.
                       - root@192.168.1.225
-                      - ls -al
+                      - /home/admin-sv/my-nook/deploy.sh

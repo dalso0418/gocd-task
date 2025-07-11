@@ -13,7 +13,7 @@ pipelines:
             run-ls-on-server:
               environment_variables:
                 SERVER_KEY_B64: "{{SECRET:[ssh-key][gocd_deploy_key]}}"
-                DISCORD_WEBHOOK: "{{SECRET:[discord-webhook][discord_webhookurl]}}"
+                DISCORD_WEBHOOK: "{{SECRET:[discord-webhook][discord-webhookurl]}}"
               tasks:
                 - exec:
                     # --- 기존 SSH 접속 스크립트 ---
@@ -24,7 +24,7 @@ pipelines:
                         mkdir -p ./temp
                         echo "$SERVER_KEY_B64" | base64 --decode > ./temp/id_rsa_remote
                         chmod 600 ./temp/id_rsa_remote
-                        ssh -F /dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ./temp/id_rsa_remote user@your-server.com 'echo "--- 원격 서버 파일 목록 ---"; ls -la'
+                        ssh -F /dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ./temp/id_rsa_remote root@192.168.1.118 'echo "--- 원격 서버 파일 목록 ---"; ls -la'
                         rm -rf ./temp
 
                 - exec:

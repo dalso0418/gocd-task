@@ -6,72 +6,42 @@ pipelines:
   # 'test-pipeline' 이라는 이름의 파이프라인을 정의합니다.
   test-pipeline2:
     # 이 파이프라인은 'defaultGroup' 이라는 그룹에 속합니다.
-    # 그룹은 대시보드에서 파이프라인을 정리하는 폴더 역할을 합니다.
     group: defaultGroup
 
     # 파이프라인의 재료(트리거)를 정의합니다.
     materials:
-      # 이 머티리얼에 'my-app-repo'라는 논리적인 이름을 부여합니다.
       my-app-repo:
         # Git 저장소를 머티리얼로 사용합니다.
-        git: https://github.com/dalso0418/gocd-task.git # 감시할 실제 애플리케이션의 Git 저장소 주소입니다.
-        branch: main # main 브랜치의 변경 사항을 감시합니다.
-        # Private 저장소 접근을 위한 사용자 이름과 비밀번호(또는 Personal Access Token)를 설정합니다.
-        # 보안을 위해 비밀번호는 GoCD의 암호화된 변수를 사용하는 것이 좋습니다.
-        auto_update: true # GoCD가 자동으로 새로운 커밋을 확인하도록 설정합니다.
+        git: https://github.com/dalso0418/gocd-task.git
+        branch: main
+        auto_update: true
 
     # 파이프라인의 단계(스테이지)들을 순서대로 정의합니다.
     stages:
-      # 'build-and-test' 라는 이름의 첫 번째 스테이지를 정의합니다.
       - build-and-test:
-          # 이 스테이지에서 실행될 작업(잡)들을 정의합니다.
           jobs:
-            # 'compile-and-unit-test' 라는 이름의 잡을 정의합니다.
             compile-and-unit-test:
-              # 이 잡에서 순서대로 실행될 명령어(태스크)들을 정의합니다.
               tasks:
-                # 첫 번째 태스크: 셸 명령어를 실행합니다.
                 - exec:
-                    # 실행할 명령어는 'echo' 입니다.
                     command: echo
-                    # 명령어에 전달할 인자(arguments)입니다.
                     arguments:
                       - ">>> 1. 코드를 성공적으로 가져왔습니다."
-                # 두 번째 태스크: 빌드 및 테스트 스크립트를 실행합니다.
                 - exec:
                     command: echo
                     arguments:
-                      - ">>> 2. 여기서 실제 빌드 및 테스트 명령어를 실행합니다. (예: ./gradlew build)"
+                      - ">>> 2. 여기서 실제 빌드 및 테스트 명령어를 실행합니다. (예:./gradlew build)"
       - deploy-to-server:
           jobs:
-            # 'run-remote-script' 라는 이름의 잡을 정의합니다.
             run-remote-script:
-              # 1. SSH 키를 안전한 환경 변수로 정의합니다.
-              # 이 변수의 실제 값은 GoCD UI에서 직접 설정해야 합니다.
-              secure_environment_variables:
-                SSH_PRIVATE_KEY: "placeholder"
               tasks:
-                # 2. 환경 변수를 사용하여 SSH 개인 키 파일을 생성합니다.
-                - exec:
-                    command: bash
-                    arguments:
-                      - -c
-                      - |
-                        echo "$SSH_PRIVATE_KEY" > /go/id_ed25519
-                        chmod 600 /go/id_ed25519
-                # 3. SSH를 사용하여 원격 서버에 접속하고 배포 스크립트를 실행합니다.
+                # ⭐️ 이제 키 파일을 생성하는 단계가 필요 없습니다.
+                # 1. 마운트된 SSH 키를 사용하여 원격 서버에 바로 접속합니다.
                 - exec:
                     command: ssh
                     arguments:
                       - -i # 사용할 개인 키 파일을 지정합니다.
-                      - /go/id_ed25519
+                      - /home/go/.ssh/id_ed25519 # 컨테이너에 직접 마운트된 키 경로
                       - -o # SSH 접속 옵션을 지정합니다.
                       - StrictHostKeyChecking=no # 처음 접속하는 서버의 호스트 키를 자동으로 신뢰합니다.
-                      - root@192.168.1.225 # 'user@your-server.com'을 실제 서버 접속 정보로 변경하세요.
-                      - ls -al # 원격 서버에서 실행할 스크립트 경로를 지정하세요.
-                # 4. 보안을 위해 사용이 끝난 개인 키 파일을 즉시 삭제합니다.
-                - exec:
-                    command: rm
-                    arguments:
-                      - -f
-                      - /go/id_ed25519
+                      - root@192.168.1.225
+                      - ls -al

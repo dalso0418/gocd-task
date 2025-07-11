@@ -16,7 +16,6 @@ pipelines:
                 DISCORD_WEBHOOK: "{{SECRET:[discord-webhook][discord-webhookurl]}}"
               tasks:
                 - exec:
-                    # --- 1. SSH 접속 및 결과 파일로 저장 ---
                     command: bash
                     arguments:
                       - -c
@@ -24,21 +23,17 @@ pipelines:
                         mkdir -p ./temp
                         echo "$SERVER_KEY_B64" | base64 --decode > ./temp/id_rsa_remote
                         chmod 600 ./temp/id_rsa_remote
-                        # ssh 명령어의 결과를 task_output.log 파일로 저장합니다.
                         ssh -F /dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ./temp/id_rsa_remote root@192.168.1.118 'echo "--- 원격 서버 파일 목록 ---"; ls -la' > task_output.log
                         rm -rf ./temp
 
                 - exec:
-                    # --- 2. 성공 알림 보내기 (결과 포함) ---
-                    run_if: passed # 이전 작업이 성공했을 때만 실행
+                    run_if: passed
                     command: bash
                     arguments:
                       - -c
                       - |
-                        # JSON에 넣기 위해 줄바꿈 문자를 \\n으로 변경하고, 따옴표를 이스케이프 처리합니다.
                         TASK_RESULT=$(cat task_output.log | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
                         
-                        # Discord 임베드 형식으로 JSON 페이로드 생성
                         JSON_PAYLOAD=$(printf '{
                           "embeds": [{
                             "title": "✅ 파이프라인 실행 성공: %s",
@@ -53,7 +48,6 @@ pipelines:
 
                         curl -H "Content-Type: application/json" -X POST -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK"
               
-              # --- 3. 작업이 실패하거나 취소되었을 때 실행되는 블록 ---
               on_cancel:
                 - exec:
                     command: bash

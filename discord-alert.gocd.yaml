@@ -34,7 +34,7 @@ pipelines:
                             \"embeds\": [
                               {
                                 \"title\": \"✅ 파이프라인 실행 성공: ${GO_PIPELINE_NAME}\",
-                                \"description\": \"**- 스테이지:** ${GO_STAGE_NAME}\\n**- 잡:** ${GO_JOB_NAME}\",
+                                \"description\": \"**- Stage:** ${GO_STAGE_NAME}\\n**- Job:** ${GO_JOB_NAME}\",
                                 \"color\": 3066993
                               }
                             ]
@@ -51,7 +51,7 @@ pipelines:
                             \"embeds\": [
                               {
                                 \"title\": \"❌ 파이프라인 실행 실패: ${GO_PIPELINE_NAME}\",
-                                \"description\": \"**- 스테이지:** ${GO_STAGE_NAME}\\n**- 잡:** ${GO_JOB_NAME}\",
+                                \"description\": \"**- Stage:** ${GO_STAGE_NAME}\\n**- Job:** ${GO_JOB_NAME}\",
                                 \"color\": 15158332
                               }
                             ]

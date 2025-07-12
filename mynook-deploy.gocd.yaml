@@ -23,6 +23,8 @@ pipelines:
       - deploy-to-server:
           jobs:
             run-remote-script:
+              environment_variables:
+                DISCORD_WEBHOOK: "{{SECRET:[discord-webhook][discord-webhookurl]}}"
               tasks:
                 # ⭐️ 이제 키 파일을 생성하는 단계가 필요 없습니다.
                 # 1. 마운트된 SSH 키를 사용하여 원격 서버에 바로 접속합니다.

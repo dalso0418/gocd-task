@@ -1,5 +1,3 @@
-# gocd.yaml
-
 pipelines:
   discord-alert:
     group: defaultGroup
@@ -20,11 +18,11 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        mkdir -p ./temp
-                        echo "$SERVER_KEY_B64" | base64 --decode > ./temp/id_rsa_remote
-                        chmod 600 ./temp/id_rsa_remote
-                        ssh -F /dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ./temp/id_rsa_remote root@192.168.1.118 'echo "--- 원격 서버 파일 목록 ---"; ls -la' > task_output.log
-                        rm -rf ./temp
+                          mkdir -p ./temp
+                          echo "$SERVER_KEY_B64" | base64 --decode > ./temp/id_rsa_remote
+                          chmod 600 ./temp/id_rsa_remote
+                          ssh -F /dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ./temp/id_rsa_remote root@192.168.1.118 'echo "--- 원격 서버 파일 목록 ---"; ls -la' > task_output.log
+                          rm -rf ./temp
 
                 - exec:
                     run_if: passed
@@ -33,40 +31,39 @@ pipelines:
                       - -c
                       - |
                           TASK_RESULT=$(cat task_output.log | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
-                
-                          cat > payload.json <<EOF
-                {
-                  "embeds": [
-                    {
-                      "title": "✅ 파이프라인 실행 성공: ${GO_PIPELINE_NAME}",
-                      "description": "**- 파이프라인:** [${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}](${GO_SERVER_URL}/go/pipelines/${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}/${GO_STAGE_NAME}/${GO_STAGE_COUNTER})\n**- 스테이지:** ${GO_STAGE_NAME}\n**- 잡:** ${GO_JOB_NAME}",
-                      "color": 3066993,
-                      "fields": [
-                        {
-                          "name": "📜 원격 작업 실행 결과",
-                          "value": "```bash\n${TASK_RESULT}\n```"
-                        }
-                      ]
-                    }
-                  ]
-                }
-                EOF
-                
+
+                          echo "{
+                            \"embeds\": [
+                              {
+                                \"title\": \"✅ 파이프라인 실행 성공: ${GO_PIPELINE_NAME}\",
+                                \"description\": \"**- 파이프라인:** [${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}](${GO_SERVER_URL}/go/pipelines/${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}/${GO_STAGE_NAME}/${GO_STAGE_COUNTER})\\n**- 스테이지:** ${GO_STAGE_NAME}\\n**- 잡:** ${GO_JOB_NAME}\",
+                                \"color\": 3066993,
+                                \"fields\": [
+                                  {
+                                    \"name\": \"📜 원격 작업 실행 결과\",
+                                    \"value\": \"\`\`\`bash\\n${TASK_RESULT}\\n\`\`\`\"
+                                  }
+                                ]
+                              }
+                            ]
+                          }" > payload.json
+
                           curl -H "Content-Type: application/json" -X POST --data-binary @payload.json "$DISCORD_WEBHOOK"
 
-                                      
               on_cancel:
                 - exec:
                     command: bash
                     arguments:
                       - -c
                       - |
-                        JSON_PAYLOAD=$(printf '{
-                          "embeds": [{
-                            "title": "❌ 파이프라인 실행 실패: %s",
-                            "description": "**- 파이프라인:** [%s/%s](%s)\n**- 스테이지:** %s\n**- 잡:** %s",
-                            "color": 15158332
-                          }]
-                        }' "${GO_PIPELINE_NAME}" "${GO_PIPELINE_NAME}" "${GO_PIPELINE_COUNTER}" "${GO_SERVER_URL}/go/pipelines/${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}/${GO_STAGE_NAME}/${GO_STAGE_COUNTER}" "${GO_STAGE_NAME}" "${GO_JOB_NAME}")
+                          echo "{
+                            \"embeds\": [
+                              {
+                                \"title\": \"❌ 파이프라인 실행 실패: ${GO_PIPELINE_NAME}\",
+                                \"description\": \"**- 파이프라인:** [${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}](${GO_SERVER_URL}/go/pipelines/${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}/${GO_STAGE_NAME}/${GO_STAGE_COUNTER})\\n**- 스테이지:** ${GO_STAGE_NAME}\\n**- 잡:** ${GO_JOB_NAME}\",
+                                \"color\": 15158332
+                              }
+                            ]
+                          }" > payload.json
 
-                        curl -H "Content-Type: application/json" -X POST -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK"
+                          curl -H "Content-Type: application/json" -X POST --data-binary @payload.json "$DISCORD_WEBHOOK"

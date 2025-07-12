@@ -32,35 +32,28 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        TASK_RESULT=$(cat task_output.log)
-                        
-                        # JSON payload를 jq로 생성
-                        JSON_PAYLOAD=$(jq -n \
-                          --arg pipeline_name "$GO_PIPELINE_NAME" \
-                          --arg pipeline_counter "$GO_PIPELINE_COUNTER" \
-                          --arg pipeline_url "$GO_SERVER_URL/go/pipelines/$GO_PIPELINE_NAME/$GO_PIPELINE_COUNTER/$GO_STAGE_NAME/$GO_STAGE_COUNTER" \
-                          --arg stage_name "$GO_STAGE_NAME" \
-                          --arg job_name "$GO_JOB_NAME" \
-                          --arg task_result "$TASK_RESULT" \
-                          '{
-                            "embeds": [
-                              {
-                                "title": "✅ 파이프라인 실행 성공: \($pipeline_name)",
-                                "description": "**- 파이프라인:** [\($pipeline_name)/\($pipeline_counter)](\($pipeline_url))\n**- 스테이지:** \($stage_name)\n**- 잡:** \($job_name)",
-                                "color": 3066993,
-                                "fields": [
-                                  {
-                                    "name": "📜 원격 작업 실행 결과",
-                                    "value": ("```bash\n" + $task_result + "\n```")
-                                  }
-                                ]
-                              }
-                            ]
-                          }'
-                        )
-                        
-                        # Discord Webhook으로 전송
-                        curl -H "Content-Type: application/json" -X POST -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK"
+                          TASK_RESULT=$(cat task_output.log | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
+                
+                          cat > payload.json <<EOF
+                {
+                  "embeds": [
+                    {
+                      "title": "✅ 파이프라인 실행 성공: ${GO_PIPELINE_NAME}",
+                      "description": "**- 파이프라인:** [${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}](${GO_SERVER_URL}/go/pipelines/${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}/${GO_STAGE_NAME}/${GO_STAGE_COUNTER})\n**- 스테이지:** ${GO_STAGE_NAME}\n**- 잡:** ${GO_JOB_NAME}",
+                      "color": 3066993,
+                      "fields": [
+                        {
+                          "name": "📜 원격 작업 실행 결과",
+                          "value": "```bash\n${TASK_RESULT}\n```"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                EOF
+                
+                          curl -H "Content-Type: application/json" -X POST --data-binary @payload.json "$DISCORD_WEBHOOK"
+
                                       
               on_cancel:
                 - exec:

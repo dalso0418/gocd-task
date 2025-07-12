@@ -30,8 +30,8 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                          TASK_RESULT=$(cat task_output.log | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
-
+                          TASK_RESULT_B64=$(base64 -w0 task_output.log)
+                
                           echo "{
                             \"embeds\": [
                               {
@@ -40,15 +40,16 @@ pipelines:
                                 \"color\": 3066993,
                                 \"fields\": [
                                   {
-                                    \"name\": \"📜 원격 작업 실행 결과\",
-                                    \"value\": \"\`\`\`bash\\n${TASK_RESULT}\\n\`\`\`\"
+                                    \"name\": \"📜 작업 결과(base64)\",
+                                    \"value\": \"${TASK_RESULT_B64}\"
                                   }
                                 ]
                               }
                             ]
                           }" > payload.json
-
+                
                           curl -H "Content-Type: application/json" -X POST --data-binary @payload.json "$DISCORD_WEBHOOK"
+
 
               on_cancel:
                 - exec:

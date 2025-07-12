@@ -32,22 +32,36 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        TASK_RESULT=$(cat task_output.log | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+                        TASK_RESULT=$(cat task_output.log)
                         
-                        JSON_PAYLOAD=$(printf '{
-                          "embeds": [{
-                            "title": "✅ 파이프라인 실행 성공: %s",
-                            "description": "**- 파이프라인:** [%s/%s](%s)\n**- 스테이지:** %s\n**- 잡:** %s",
-                            "color": 3066993,
-                            "fields": [{
-                              "name": "📜 원격 작업 실행 결과",
-                              "value": "```bash\n%s\n```"
-                            }]
-                          }]
-                        }' "${GO_PIPELINE_NAME}" "${GO_PIPELINE_NAME}" "${GO_PIPELINE_COUNTER}" "${GO_SERVER_URL}/go/pipelines/${GO_PIPELINE_NAME}/${GO_PIPELINE_COUNTER}/${GO_STAGE_NAME}/${GO_STAGE_COUNTER}" "${GO_STAGE_NAME}" "${GO_JOB_NAME}" "$TASK_RESULT")
-
+                        # JSON payload를 jq로 생성
+                        JSON_PAYLOAD=$(jq -n \
+                          --arg pipeline_name "$GO_PIPELINE_NAME" \
+                          --arg pipeline_counter "$GO_PIPELINE_COUNTER" \
+                          --arg pipeline_url "$GO_SERVER_URL/go/pipelines/$GO_PIPELINE_NAME/$GO_PIPELINE_COUNTER/$GO_STAGE_NAME/$GO_STAGE_COUNTER" \
+                          --arg stage_name "$GO_STAGE_NAME" \
+                          --arg job_name "$GO_JOB_NAME" \
+                          --arg task_result "$TASK_RESULT" \
+                          '{
+                            "embeds": [
+                              {
+                                "title": "✅ 파이프라인 실행 성공: \($pipeline_name)",
+                                "description": "**- 파이프라인:** [\($pipeline_name)/\($pipeline_counter)](\($pipeline_url))\n**- 스테이지:** \($stage_name)\n**- 잡:** \($job_name)",
+                                "color": 3066993,
+                                "fields": [
+                                  {
+                                    "name": "📜 원격 작업 실행 결과",
+                                    "value": ("```bash\n" + $task_result + "\n```")
+                                  }
+                                ]
+                              }
+                            ]
+                          }'
+                        )
+                        
+                        # Discord Webhook으로 전송
                         curl -H "Content-Type: application/json" -X POST -d "$JSON_PAYLOAD" "$DISCORD_WEBHOOK"
-              
+                                      
               on_cancel:
                 - exec:
                     command: bash

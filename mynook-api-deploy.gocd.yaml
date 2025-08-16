@@ -36,7 +36,7 @@ pipelines:
                       - -o # SSH 접속 옵션을 지정합니다.
                       - StrictHostKeyChecking=no # 처음 접속하는 서버의 호스트 키를 자동으로 신뢰합니다.
                       - root@192.168.1.225
-                      - "cd /home/admin-sv/api-my-nook && docker compose up -d --build"
+                      - "cd /home/admin-sv/api-my-nook && git pull && docker compose up -d --build"
                 - exec:
                     run_if: passed
                     command: bash

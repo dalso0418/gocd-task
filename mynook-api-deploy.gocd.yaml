@@ -63,7 +63,7 @@ pipelines:
                           echo "{
                             \"embeds\": [
                               {
-                                \"title\": \"❌ 파이프라인 실행 실패: ${GO_PIPELINE_NAME}\",
+                                \"title\": \"❌ API 배포 파이프라인 실행 실패: ${GO_PIPELINE_NAME}\",
                                 \"description\": \"**- Stage:** ${GO_STAGE_NAME}\\n**- Job:** ${GO_JOB_NAME}\",
                                 \"color\": 15158332
                               }

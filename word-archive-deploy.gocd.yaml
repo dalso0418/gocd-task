@@ -1,0 +1,73 @@
+# 파이프라인 포맷 버전을 지정합니다. (v10은 최신 안정 버전입니다)
+format_version: 10
+
+# 파이프라인 그룹들을 정의합니다.
+pipelines:
+  # 'test-pipeline' 이라는 이름의 파이프라인을 정의합니다.
+  word-archive-deploy:
+    # 이 파이프라인은 'defaultGroup' 이라는 그룹에 속합니다.
+    group: defaultGroup
+
+    # 파이프라인의 재료(트리거)를 정의합니다.
+    materials:
+      my-app-repo:
+        # Git 저장소를 머티리얼로 사용합니다.
+        git: https://github.com/somoon0418/word-archive.git
+        username: somoon0418
+        password: "{{SECRET:[my-file-secrets][somoon_config_repo_credential]}}"
+        branch: master
+        auto_update: true
+
+    # 파이프라인의 단계(스테이지)들을 순서대로 정의합니다.
+    stages:
+      - deploy-to-server:
+          jobs:
+            run-remote-script:
+              environment_variables:
+                DISCORD_WEBHOOK: "{{SECRET:[discord-webhook][discord-webhookurl]}}"
+              tasks:
+                # ⭐️ 이제 키 파일을 생성하는 단계가 필요 없습니다.
+                # 1. 마운트된 SSH 키를 사용하여 원격 서버에 바로 접속합니다.
+                - exec:
+                    command: ssh
+                    arguments:
+                      - -i # 사용할 개인 키 파일을 지정합니다.
+                      - /home/go/.ssh/id_ed25519 # 컨테이너에 직접 마운트된 키 경로
+                      - -o # SSH 접속 옵션을 지정합니다.
+                      - StrictHostKeyChecking=no # 처음 접속하는 서버의 호스트 키를 자동으로 신뢰합니다.
+                      - root@192.168.1.225
+                      - "cd /home/admin-sv/word-archive && git pull && docker compose up -d --build"
+                - exec:
+                    run_if: passed
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                          echo "{
+                            \"embeds\": [
+                              {
+                                \"title\": \"✅ 파이프라인 실행 성공: ${GO_PIPELINE_NAME}\",
+                                \"description\": \"**- Stage:** ${GO_STAGE_NAME}\\n**- Job:** ${GO_JOB_NAME}\",
+                                \"color\": 3066993
+                              }
+                            ]
+                          }" > payload.json
+                
+                          curl -H "Content-Type: application/json" -X POST --data-binary @payload.json "$DISCORD_WEBHOOK"
+              on_cancel:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                          echo "{
+                            \"embeds\": [
+                              {
+                                \"title\": \"❌ 파이프라인 실행 실패: ${GO_PIPELINE_NAME}\",
+                                \"description\": \"**- Stage:** ${GO_STAGE_NAME}\\n**- Job:** ${GO_JOB_NAME}\",
+                                \"color\": 15158332
+                              }
+                            ]
+                          }" > payload.json
+
+                          curl -H "Content-Type: application/json" -X POST --data-binary @payload.json "$DISCORD_WEBHOOK"
